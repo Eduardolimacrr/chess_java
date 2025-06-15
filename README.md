@@ -18,13 +18,13 @@ O jogo conta com um conjunto completo de funcionalidades, desde as regras oficia
   - **Movimentos Especiais:**
       - **Roque** (maior e menor).
       - Captura ***En Passant***.
-      - Promoção de Peão** com opção de escolha (Dama, Torre, Bispo ou Cavalo).
+      - **Promoção de Peão** com opção de escolha (Dama, Torre, Bispo ou Cavalo).
 
 ### Modos de Jogo
 
   - **Jogador vs. Jogador:** Modo clássico para dois jogadores no mesmo computador.
   -**Jogador vs. IA (BOT):** Jogue contra um oponente controlado pelo computador.
-  -A IA utiliza o algoritmo **Minimax** com a otimização de **Poda Alfa-Beta** para calcular suas jogadas.
+  - A IA utiliza o algoritmo **Minimax** com a otimização de **Poda Alfa-Beta** para calcular suas jogadas.
   -**Jogo em Rede (Sockets):** Dispute partidas com outro jogador em uma rede local.
   -**Controles de Tempo:** Selecione modos de jogo com tempo, como **Bullet (1 min)**, **Blitz (5 min)** e **Rápida (10 min)**.
 
