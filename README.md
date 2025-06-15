@@ -14,7 +14,7 @@ O jogo conta com um conjunto completo de funcionalidades, desde as regras oficia
 ### Regras e Mecânicas de Jogo
 
   - **Movimentação Completa:** Todas as peças se movem de acordo com as regras oficiais do xadrez.
-  - [cite\_start]**Regras Essenciais:** Implementação completa de **Xeque**, **Xeque-mate** e **Empate** (Afogamento)[cite: 20].
+  -**Regras Essenciais:** Implementação completa de **Xeque**, **Xeque-mate** e **Empate** (Afogamento).
   - **Movimentos Especiais:**
       - **Roque** (maior e menor).
       - Captura ***En Passant***.
@@ -23,24 +23,24 @@ O jogo conta com um conjunto completo de funcionalidades, desde as regras oficia
 ### Modos de Jogo
 
   - **Jogador vs. Jogador:** Modo clássico para dois jogadores no mesmo computador.
-  - [cite\_start]**Jogador vs. IA (BOT):** Jogue contra um oponente controlado pelo computador[cite: 20].
-      - [cite\_start]A IA utiliza o algoritmo **Minimax** com a otimização de **Poda Alfa-Beta** para calcular suas jogadas[cite: 20].
-  - [cite\_start]**Jogo em Rede (Sockets):** Dispute partidas com outro jogador em uma rede local[cite: 20].
-  - [cite\_start]**Controles de Tempo:** Selecione modos de jogo com tempo, como **Bullet (1 min)**, **Blitz (5 min)** e **Rápida (10 min)**[cite: 20].
+  -**Jogador vs. IA (BOT):** Jogue contra um oponente controlado pelo computador.
+  -A IA utiliza o algoritmo **Minimax** com a otimização de **Poda Alfa-Beta** para calcular suas jogadas.
+  -**Jogo em Rede (Sockets):** Dispute partidas com outro jogador em uma rede local.
+  -**Controles de Tempo:** Selecione modos de jogo com tempo, como **Bullet (1 min)**, **Blitz (5 min)** e **Rápida (10 min)**.
 
 ### Funcionalidades Adicionais
 
-  - [cite\_start]**Persistência de Jogo:** Salve o estado de uma partida a qualquer momento e carregue-a mais tarde para continuar jogando[cite: 5].
-  - [cite\_start]**Ranking de Vitórias:** Um ranking de jogadores é mantido e salvo em um arquivo, registrando o número de vitórias de cada jogador[cite: 6].
-  - [cite\_start]**Interface Gráfica Intuitiva:** Interface limpa construída com **Java Swing**, com destaque visual para peças selecionadas e mensagens de status claras[cite: 8, 9].
+  -**Persistência de Jogo:** Salve o estado de uma partida a qualquer momento e carregue-a mais tarde para continuar jogando.
+  -**Ranking de Vitórias:** Um ranking de jogadores é mantido e salvo em um arquivo, registrando o número de vitórias de cada jogador.
+  -**Interface Gráfica Intuitiva:** Interface limpa construída com **Java Swing**, com destaque visual para peças selecionadas e mensagens de status claras.
 
 ## 🏛️ Arquitetura do Projeto
 
 O software foi rigorosamente estruturado seguindo o padrão de arquitetura **MVC (Model-View-Controller)** para garantir a separação de responsabilidades, escalabilidade e manutenibilidade do código.
 
-  * **`model`**: Contém toda a lógica de negócios e as regras do jogo. É o "cérebro" da aplicação. [cite\_start]Ele não tem conhecimento da interface gráfica.
+  * **`model`**: Contém toda a lógica de negócios e as regras do jogo. É o "cérebro" da aplicação.Ele não tem conhecimento da interface gráfica.
       * Classes principais: `Game`, `Tabuleiro`, `Peca` (e suas subclasses), `Ranking`.
-  * **`view`**: Responsável por toda a apresentação visual e pela interface com o usuário. [cite\_start]Ela apenas exibe os dados fornecidos pelo modelo e captura as interações do usuário.
+  * **`view`**: Responsável por toda a apresentação visual e pela interface com o usuário.Ela apenas exibe os dados fornecidos pelo modelo e captura as interações do usuário.
       * Classe principal: `JanelaXadrez`.
   * **`controller`**: Atua como o intermediário, recebendo as ações do usuário (da `View`), processando-as, atualizando o `Model` e, em seguida, atualizando a `View` com o novo estado.
       * Classe principal: `XadrezController`.
