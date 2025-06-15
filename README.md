@@ -3,10 +3,6 @@
 
 Este é um projeto de um jogo de xadrez completo, desenvolvido em Java com a biblioteca gráfica Swing. O software foi construído seguindo a arquitetura MVC (Model-View-Controller) e inclui funcionalidades avançadas como múltiplos modos de jogo (incluindo IA e rede), regras completas de xadrez, persistência de dados e ranking de jogadores.
 
-> [cite\_start]**Objetivo Original do Projeto:** Desenvolver um jogo de xadrez em Java com interface gráfica usando Swing, estruturado na arquitetura MVC (Model-View-Controller), com regras simples, sem roque, xeque, xeque-mate, e com persistência do estado do jogo e ranking de jogadores[cite: 2].
->
-> [cite\_start]**Resultado Final:** O projeto final superou o objetivo inicial, implementando com sucesso não apenas os requisitos básicos, mas também todas as funcionalidades complexas opcionais, incluindo as regras completas, IA e jogo em rede[cite: 20].
-
 ## Screenshot
 
 ![image](https://github.com/user-attachments/assets/23086795-9a75-4613-bb3e-333d1906241a)
@@ -20,9 +16,9 @@ O jogo conta com um conjunto completo de funcionalidades, desde as regras oficia
   - **Movimentação Completa:** Todas as peças se movem de acordo com as regras oficiais do xadrez.
   - [cite\_start]**Regras Essenciais:** Implementação completa de **Xeque**, **Xeque-mate** e **Empate** (Afogamento)[cite: 20].
   - **Movimentos Especiais:**
-      - [cite\_start]**Roque** (maior e menor)[cite: 20].
-      - [cite\_start]Captura ***En Passant***[cite: 20].
-      - [cite\_start]**Promoção de Peão** com opção de escolha (Dama, Torre, Bispo ou Cavalo)[cite: 20].
+      - **Roque** (maior e menor).
+      - Captura ***En Passant***.
+      - Promoção de Peão** com opção de escolha (Dama, Torre, Bispo ou Cavalo).
 
 ### Modos de Jogo
 
@@ -40,23 +36,22 @@ O jogo conta com um conjunto completo de funcionalidades, desde as regras oficia
 
 ## 🏛️ Arquitetura do Projeto
 
-[cite\_start]O software foi rigorosamente estruturado seguindo o padrão de arquitetura **MVC (Model-View-Controller)** para garantir a separação de responsabilidades, escalabilidade e manutenibilidade do código[cite: 2].
+O software foi rigorosamente estruturado seguindo o padrão de arquitetura **MVC (Model-View-Controller)** para garantir a separação de responsabilidades, escalabilidade e manutenibilidade do código.
 
-  * **`model`**: Contém toda a lógica de negócios e as regras do jogo. É o "cérebro" da aplicação. [cite\_start]Ele não tem conhecimento da interface gráfica[cite: 13].
+  * **`model`**: Contém toda a lógica de negócios e as regras do jogo. É o "cérebro" da aplicação. [cite\_start]Ele não tem conhecimento da interface gráfica.
       * Classes principais: `Game`, `Tabuleiro`, `Peca` (e suas subclasses), `Ranking`.
-  * **`view`**: Responsável por toda a apresentação visual e pela interface com o usuário. [cite\_start]Ela apenas exibe os dados fornecidos pelo modelo e captura as interações do usuário[cite: 13].
+  * **`view`**: Responsável por toda a apresentação visual e pela interface com o usuário. [cite\_start]Ela apenas exibe os dados fornecidos pelo modelo e captura as interações do usuário.
       * Classe principal: `JanelaXadrez`.
-  * [cite\_start]**`controller`**: Atua como o intermediário, recebendo as ações do usuário (da `View`), processando-as, atualizando o `Model` e, em seguida, atualizando a `View` com o novo estado[cite: 13].
+  * **`controller`**: Atua como o intermediário, recebendo as ações do usuário (da `View`), processando-as, atualizando o `Model` e, em seguida, atualizando a `View` com o novo estado.
       * Classe principal: `XadrezController`.
   * **`ai`**: Pacote dedicado para a Inteligência Artificial, contendo a lógica do Minimax e a função de avaliação.
   * **`network`**: Pacote dedicado para a funcionalidade de jogo em rede, gerenciando os Sockets e a comunicação.
 
-[cite\_start]Esta arquitetura cumpre os requisitos de ter ao menos uma **interface** definida pelo usuário (`NetworkManager.NetworkListener`) e **herança** (`Peca` e suas subclasses)[cite: 19].
 
 ## 🛠️ Tecnologias Utilizadas
 
-  * [cite\_start]**Linguagem:** Java 8 ou superior[cite: 12].
-  * [cite\_start]**Interface Gráfica:** Java Swing[cite: 12].
+  * **Linguagem:** Java 8 ou superior.
+  * **Interface Gráfica:** Java Swing.
 
 ## 🚀 Como Compilar e Executar
 
