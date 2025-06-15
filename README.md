@@ -5,7 +5,9 @@ Este é um projeto de um jogo de xadrez completo, desenvolvido em Java com a bib
 
 ## Screenshot
 
-![image](https://github.com/user-attachments/assets/23086795-9a75-4613-bb3e-333d1906241a)
+<p align="center">
+  <img src="![image](https://github.com/user-attachments/assets/23086795-9a75-4613-bb3e-333d1906241a)"/>
+</p>
 
 ## ✨ Funcionalidades
 
