@@ -392,7 +392,7 @@ public class XadrezController implements NetworkManager.NetworkListener {
     }
 
     private long selecionarTempoDeJogo() {
-        Object[] opcoes = {"Bullet (1 min)", "Blitz (5 min)", "Rápida (10 min)", "Sem tempo"};
+        Object[] opcoes = {"Bullet (1 min)", "Blitz (5 min)", "Rápida (10 min)", "Clássica (30 min)", "Sem tempo"};
         String escolha = (String) JOptionPane.showInputDialog(
                 gameView, "Selecione o modo de tempo:", "Modo de Jogo",
                 JOptionPane.PLAIN_MESSAGE, null, opcoes, "Rápida (10 min)");
@@ -401,6 +401,7 @@ public class XadrezController implements NetworkManager.NetworkListener {
             case "Bullet (1 min)": return 60 * 1000;
             case "Blitz (5 min)": return 5 * 60 * 1000;
             case "Rápida (10 min)": return 10 * 60 * 1000;
+            case "Clássica (30 min)": return 30 * 60 * 1000;
             default: return -1;
         }
     }
