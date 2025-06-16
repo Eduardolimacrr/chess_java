@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -22,8 +23,11 @@ import model.Peao;
 import model.Peca;
 import model.Posicao;
 import model.Ranking;
+import model.Tabuleiro; // <-- IMPORT ADICIONADO AQUI
+import network.GameSetupMessage;
 import network.Move;
 import network.NetworkManager;
+import network.PromotionMove;
 import view.JanelaXadrez;
 
 public class XadrezController implements NetworkManager.NetworkListener {
@@ -58,9 +62,10 @@ public class XadrezController implements NetworkManager.NetworkListener {
 
     private void iniciarJogo() {
         gameView.setVisible(true);
-        pararTimers();
+        pararFecharConexao();
         gameView.atualizarTimers(-1, -1);
-        gameView.atualizarTabuleiro(gameModel.getTabuleiro());
+        gameView.atualizarTabuleiro(new Tabuleiro());
+        gameView.setStatus("Bem-vindo! Selecione uma opção no menu 'Jogo'.");
     }
     
     private void reiniciarJogo() {
@@ -151,7 +156,7 @@ public class XadrezController implements NetworkManager.NetworkListener {
     }
 
     private void cliqueNaCasa(Posicao posClicada) {
-        if (gameModel.isFimDeJogo()) return;
+        if (gameModel == null || gameModel.isFimDeJogo()) return;
         if (modoVsIA && gameModel.getTurnoAtual() != corDoJogadorHumano) return;
         if (modoRede && gameModel.getTurnoAtual() != corDoJogadorRede) return;
 
@@ -168,16 +173,21 @@ public class XadrezController implements NetworkManager.NetworkListener {
                 return;
             }
 
+            Peca pecaMovidaAntesDoMovimento = gameModel.getTabuleiro().getPeca(posicaoOrigem);
+            boolean ehPromocao = (pecaMovidaAntesDoMovimento instanceof Peao && 
+                                  (posClicada.getLinha() == 0 || posClicada.getLinha() == 7));
+
             boolean movimentoValido = gameModel.moverPeca(posicaoOrigem, posClicada);
             
             if (movimentoValido) {
-                if (modoRede) {
-                    networkManager.sendMove(new Move(posicaoOrigem, posClicada));
+                iniciarTimerDoTurno();
+
+                if (ehPromocao) {
+                    verificarPromocao(posClicada);
+                } else if (modoRede) {
+                    networkManager.sendObject(new Move(posicaoOrigem, posClicada));
                 }
                 
-                iniciarTimerDoTurno();
-                Peca pecaMovida = gameModel.getTabuleiro().getPeca(posClicada);
-                verificarPromocao(pecaMovida, posClicada);
                 posicaoOrigem = null;
                 atualizarView();
                 
@@ -187,13 +197,7 @@ public class XadrezController implements NetworkManager.NetworkListener {
                     fazerJogadaDaIA();
                 }
             } else {
-                Peca pecaNoLocal = gameModel.getTabuleiro().getPeca(posClicada);
-                if (pecaNoLocal != null && pecaNoLocal.getCor() == gameModel.getTurnoAtual()) {
-                    posicaoOrigem = posClicada;
-                    gameView.destacarCasa(posClicada.getLinha(), posClicada.getColuna(), true);
-                } else {
-                    posicaoOrigem = null;
-                }
+                posicaoOrigem = null;
             }
         }
     }
@@ -213,9 +217,16 @@ public class XadrezController implements NetworkManager.NetworkListener {
                 try {
                     Posicao[] melhorJogada = get();
                     if (melhorJogada != null) {
+                        Peca pecaMovidaAntesDoMovimento = gameModel.getTabuleiro().getPeca(melhorJogada[0]);
+                        boolean ehPromocao = (pecaMovidaAntesDoMovimento instanceof Peao &&
+                                              (melhorJogada[1].getLinha() == 0 || melhorJogada[1].getLinha() == 7));
+
                         gameModel.moverPeca(melhorJogada[0], melhorJogada[1]);
-                        Peca pecaMovida = gameModel.getTabuleiro().getPeca(melhorJogada[1]);
-                        verificarPromocao(pecaMovida, melhorJogada[1]);
+                        
+                        if (ehPromocao) {
+                            gameModel.promoverPeao(melhorJogada[1], "DAMA");
+                        }
+                        
                         atualizarView();
                         if (!verificarFimDeJogo()) {
                            iniciarTimerDoTurno();
@@ -231,20 +242,25 @@ public class XadrezController implements NetworkManager.NetworkListener {
         worker.execute();
     }
 
-    private void verificarPromocao(Peca peca, Posicao pos) {
-        if (peca instanceof Peao) {
-            int linhaFinal = (peca.getCor() == Cor.BRANCO) ? 0 : 7;
-            if (pos.getLinha() == linhaFinal) {
-                Object[] opcoes = {"Dama", "Torre", "Bispo", "Cavalo"};
-                String escolha = (String) JOptionPane.showInputDialog(
-                    gameView, "Escolha uma peça para a promoção:", "Promoção de Peão",
-                    JOptionPane.PLAIN_MESSAGE, null, opcoes, "Dama");
-                gameModel.promoverPeao(pos, escolha != null ? escolha : "Dama");
+    private void verificarPromocao(Posicao pos) {
+        // A condição foi corrigida para verificar a cor do jogador que acabou de mover.
+        if (!modoRede || gameModel.getTurnoAtual() != corDoJogadorRede) {
+            Object[] opcoes = {"Dama", "Torre", "Bispo", "Cavalo"};
+            String escolha = (String) JOptionPane.showInputDialog(
+                gameView, "Escolha uma peça para a promoção:", "Promoção de Peão",
+                JOptionPane.PLAIN_MESSAGE, null, opcoes, "Dama");
+            
+            String pecaEscolhida = (escolha != null) ? escolha : "Dama";
+            gameModel.promoverPeao(pos, pecaEscolhida);
+
+            if (modoRede) {
+                networkManager.sendObject(new PromotionMove(posicaoOrigem, pos, pecaEscolhida));
             }
         }
     }
 
     private void atualizarView() {
+        if (gameModel == null) return;
         gameView.atualizarTabuleiro(gameModel.getTabuleiro());
         gameView.atualizarTimers(gameModel.getTempoRestanteBrancasMs(), gameModel.getTempoRestantePretasMs());
         
@@ -290,7 +306,7 @@ public class XadrezController implements NetworkManager.NetworkListener {
         }
         return false;
     }
-    
+
     private void salvarJogo() {
         if(modoRede) {
             JOptionPane.showMessageDialog(gameView, "Não é possível salvar um jogo em rede.", "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -310,7 +326,7 @@ public class XadrezController implements NetworkManager.NetworkListener {
                 JOptionPane.showMessageDialog(gameView, "Erro ao salvar o jogo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
-        iniciarTimerDoTurno();
+        if(gameModel != null) iniciarTimerDoTurno();
     }
 
     private void carregarJogo() {
@@ -364,7 +380,6 @@ public class XadrezController implements NetworkManager.NetworkListener {
             for (Map.Entry<String, Integer> entry : rankingOrdenado.entrySet()) {
                 sb.append(String.format("%d. %s - %d vitórias\n", pos++, entry.getKey(), entry.getValue()));
             }
-
             JTextArea textArea = new JTextArea(sb.toString());
             textArea.setEditable(false);
             JScrollPane scrollPane = new JScrollPane(textArea);
@@ -381,9 +396,7 @@ public class XadrezController implements NetworkManager.NetworkListener {
         String escolha = (String) JOptionPane.showInputDialog(
                 gameView, "Selecione o modo de tempo:", "Modo de Jogo",
                 JOptionPane.PLAIN_MESSAGE, null, opcoes, "Rápida (10 min)");
-        
         if (escolha == null) return -2; 
-        
         switch (escolha) {
             case "Bullet (1 min)": return 60 * 1000;
             case "Blitz (5 min)": return 5 * 60 * 1000;
@@ -394,11 +407,10 @@ public class XadrezController implements NetworkManager.NetworkListener {
 
     private void configurarEIniciarTimers() {
         pararTimers();
-        if (!gameModel.isComTempo()) {
+        if (gameModel == null || !gameModel.isComTempo()) {
             gameView.atualizarTimers(-1, -1);
             return;
         }
-
         ActionListener listenerBrancas = e -> {
             gameModel.decrementarTempo(Cor.BRANCO, 1000);
             gameView.atualizarTimers(gameModel.getTempoRestanteBrancasMs(), gameModel.getTempoRestantePretasMs());
@@ -407,7 +419,6 @@ public class XadrezController implements NetworkManager.NetworkListener {
             }
         };
         timerBrancas = new Timer(1000, listenerBrancas);
-
         ActionListener listenerPretas = e -> {
             gameModel.decrementarTempo(Cor.PRETO, 1000);
             gameView.atualizarTimers(gameModel.getTempoRestanteBrancasMs(), gameModel.getTempoRestantePretasMs());
@@ -416,7 +427,6 @@ public class XadrezController implements NetworkManager.NetworkListener {
             }
         };
         timerPretas = new Timer(1000, listenerPretas);
-        
         iniciarTimerDoTurno();
     }
     
@@ -435,7 +445,7 @@ public class XadrezController implements NetworkManager.NetworkListener {
     }
     
     private void iniciarTimerDoTurno() {
-        if (!gameModel.isComTempo() || gameModel.isFimDeJogo()) {
+        if (gameModel == null || !gameModel.isComTempo() || gameModel.isFimDeJogo()) {
             pararTimers();
             return;
         }
@@ -455,35 +465,59 @@ public class XadrezController implements NetworkManager.NetworkListener {
             this.modoVsIA = false;
             this.corDoJogadorRede = isServer ? Cor.BRANCO : Cor.PRETO;
             
-            long tempo = selecionarTempoDeJogo();
-            // Em uma implementação real, o servidor ditaria o tempo. Para simplificar, ambos selecionam.
-            
-            gameModel = new Game(tempo);
-            posicaoOrigem = null;
-            configurarEIniciarTimers();
-            atualizarView();
-            
-            if (gameModel.getTurnoAtual() != corDoJogadorRede) {
-                gameView.setStatus("Jogo em rede iniciado! Aguardando jogada de " + (isServer ? "Cliente (Pretas)" : "Servidor (Brancas)"));
+            if (isServer) {
+                long tempo = selecionarTempoDeJogo();
+                if (tempo == -2) {
+                    pararFecharConexao();
+                    return;
+                }
+                networkManager.sendObject(new GameSetupMessage(tempo));
+                iniciarJogoDeRede(tempo);
             } else {
-                gameView.setStatus("Jogo em rede iniciado! É a sua vez.");
+                gameView.setStatus("Conectado! Aguardando configuração do servidor...");
             }
         });
     }
 
+    private void iniciarJogoDeRede(long tempoDeJogoMs) {
+        gameModel = new Game(tempoDeJogoMs);
+        posicaoOrigem = null;
+        configurarEIniciarTimers();
+        atualizarView();
+        
+        if (gameModel.getTurnoAtual() != corDoJogadorRede) {
+            gameView.setStatus("Jogo em rede iniciado! Aguardando jogada do oponente.");
+        } else {
+            gameView.setStatus("Jogo em rede iniciado! É a sua vez.");
+        }
+    }
+
     @Override
-    public void onMoveReceived(Move move) {
+    public void onObjectReceived(Object obj) {
         SwingUtilities.invokeLater(() -> {
-            boolean movimentoValido = gameModel.moverPeca(move.getOrigem(), move.getDestino());
-            if (movimentoValido) {
+            boolean movimentoFeito = false;
+            
+            if (obj instanceof GameSetupMessage) {
+                GameSetupMessage setupMsg = (GameSetupMessage) obj;
+                iniciarJogoDeRede(setupMsg.getTempoDeJogoMs());
+                return;
+            }
+            
+            if (obj instanceof PromotionMove) {
+                PromotionMove pMove = (PromotionMove) obj;
+                gameModel.moverPeca(pMove.getOrigem(), pMove.getDestino());
+                gameModel.promoverPeao(pMove.getDestino(), pMove.getTipoPecaPromovida());
+                movimentoFeito = true;
+            } else if (obj instanceof Move) {
+                Move move = (Move) obj;
+                gameModel.moverPeca(move.getOrigem(), move.getDestino());
+                movimentoFeito = true;
+            }
+            
+            if (movimentoFeito) {
                 iniciarTimerDoTurno();
-                Peca pecaMovida = gameModel.getTabuleiro().getPeca(move.getDestino());
-                verificarPromocao(pecaMovida, move.getDestino());
                 atualizarView();
                 verificarFimDeJogo();
-            } else {
-                // Idealmente, isso não deveria acontecer se ambos os clientes tiverem a mesma lógica.
-                System.err.println("Movimento inválido recebido do oponente.");
             }
         });
     }

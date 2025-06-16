@@ -3,6 +3,7 @@ package network;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -15,7 +16,7 @@ public class NetworkManager {
 
     public interface NetworkListener {
         void onConnectionEstablished(boolean isServer);
-        void onMoveReceived(Move move);
+        void onObjectReceived(Object obj); // Alterado para receber um Object genérico
         void onConnectionFailed(String errorMessage);
     }
 
@@ -52,24 +53,28 @@ public class NetworkManager {
 
     private void startListening() {
         try {
-            while (socket.isConnected()) {
-                Move move = (Move) in.readObject();
-                if (move != null) {
-                    listener.onMoveReceived(move);
+            while (socket != null && socket.isConnected()) {
+                Object obj = in.readObject();
+                if (obj != null) {
+                    listener.onObjectReceived(obj);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            listener.onConnectionFailed("Conexão perdida: " + e.getMessage());
+            if (!socket.isClosed()) {
+               listener.onConnectionFailed("Conexão perdida: " + e.getMessage());
+            }
         }
     }
 
-    public void sendMove(Move move) {
+    // Alterado para enviar um objeto Serializable genérico
+    public void sendObject(Serializable obj) {
         if (out != null) {
             try {
-                out.writeObject(move);
+                out.writeObject(obj);
                 out.flush();
+                out.reset(); // Importante para garantir que o objeto seja reenviado
             } catch (IOException e) {
-                System.err.println("Erro ao enviar movimento: " + e.getMessage());
+                System.err.println("Erro ao enviar objeto: " + e.getMessage());
             }
         }
     }

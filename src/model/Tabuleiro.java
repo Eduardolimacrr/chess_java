@@ -1,9 +1,13 @@
 package model;
 
-/**
- * Representa o tabuleiro 8x8 do jogo. Gerencia a localização de todas as peças.
- */
-public class Tabuleiro {
+import java.io.Serializable; // 1. IMPORT ADICIONADO
+
+// 2. "implements Serializable" ADICIONADO
+public class Tabuleiro implements Serializable {
+    
+    // 3. serialVersionUID ADICIONADO
+    private static final long serialVersionUID = 1L;
+
     private final Peca[][] pecas;
 
     public Tabuleiro() {
@@ -11,12 +15,6 @@ public class Tabuleiro {
         iniciarPecas();
     }
 
-    /**
-     * Retorna a peça em uma determinada posição (linha e coluna).
-     * @param linha A linha (0-7).
-     * @param coluna A coluna (0-7).
-     * @return A Peça na posição, ou null se a casa estiver vazia.
-     */
     public Peca getPeca(int linha, int coluna) {
         if (!isPosicaoValida(linha, coluna)) {
             return null;
@@ -24,11 +22,6 @@ public class Tabuleiro {
         return pecas[linha][coluna];
     }
 
-    /**
-     * Retorna a peça em uma determinada Posição.
-     * @param p O objeto Posição.
-     * @return A Peça na posição, ou null se a casa estiver vazia.
-     */
     public Peca getPeca(Posicao p) {
         if (!isPosicaoValida(p)) {
             return null;
@@ -36,26 +29,12 @@ public class Tabuleiro {
         return pecas[p.getLinha()][p.getColuna()];
     }
 
-    /**
-     * Coloca uma peça diretamente em uma posição do tabuleiro.
-     * Usado para configurar o tabuleiro, para simular jogadas e para desfazer movimentos.
-     * @param p A Posição onde a peça será colocada.
-     * @param peca A Peça a ser colocada.
-     */
     public void setPeca(Posicao p, Peca peca) {
         if (isPosicaoValida(p)) {
             pecas[p.getLinha()][p.getColuna()] = peca;
         }
     }
 
-    /**
-     * Move uma peça de uma posição de origem para uma de destino.
-     * Este método executa o movimento, marca a peça como "movida" e retorna
-     * a peça que foi capturada (se houver), para permitir que o movimento seja desfeito.
-     * @param origem A Posição de origem da peça.
-     * @param destino A Posição de destino da peça.
-     * @return A peça que foi capturada, ou null se a casa de destino estava vazia.
-     */
     public Peca moverPeca(Posicao origem, Posicao destino) {
         Peca pecaMovida = getPeca(origem);
         Peca pecaCapturada = getPeca(destino);
@@ -68,24 +47,15 @@ public class Tabuleiro {
         return pecaCapturada;
     }
 
-    /**
-     * Verifica se as coordenadas (linha, coluna) estão dentro dos limites do tabuleiro.
-     */
     private boolean isPosicaoValida(int linha, int coluna) {
         return linha >= 0 && linha < 8 && coluna >= 0 && coluna < 8;
     }
     
-    /**
-     * Verifica se um objeto Posição corresponde a uma casa válida no tabuleiro.
-     */
     public boolean isPosicaoValida(Posicao p) {
         if (p == null) return false;
         return isPosicaoValida(p.getLinha(), p.getColuna());
     }
 
-    /**
-     * Configura o tabuleiro com a posição inicial padrão de todas as peças.
-     */
     private void iniciarPecas() {
         // Peças Pretas
         setPeca(new Posicao(0, 0), new Torre(Cor.PRETO));
